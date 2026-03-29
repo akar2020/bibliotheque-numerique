@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Connexion — DIT Bibliothèque</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --gray-50: #f8fafc;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-300: #cbd5e1;
+      --gray-400: #94a3b8;
+      --gray-500: #64748b;
+      --gray-700: #334155;
+      --gray-800: #1e293b;
+      --gray-900: #0f172a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: var(--gray-900);
+      overflow: hidden;
+    }
+
+    /* ---- Panneau gauche décoratif ---- */
+    .panel-left {
+      flex: 1;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #1d4ed8 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-left::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(37,99,235,0.3) 0%, transparent 70%);
+      top: -100px; right: -100px;
+    }
+
+    .panel-left::after {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%);
+      bottom: -50px; left: -50px;
+    }
+
+    /* Grille de points décoratifs */
+    .dots-grid {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .brand {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      color: #fff;
+    }
+
+    .brand-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      display: block;
+      filter: drop-shadow(0 4px 20px rgba(37,99,235,0.6));
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .brand-title {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .brand-subtitle {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.5);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .brand-features {
+      margin-top: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .brand-feature {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+    }
+
+    .feature-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+      box-shadow: 0 0 8px var(--primary);
+    }
+
+    /* ---- Panneau droit formulaire ---- */
+    .panel-right {
+      width: 460px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 50px;
+      position: relative;
+    }
+
+    .login-header {
+      margin-bottom: 36px;
+    }
+
+    .login-header h1 {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+
+    .login-header p {
+      color: var(--gray-500);
+      font-size: 0.9rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-400);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: 'Sora', sans-serif;
+      outline: none;
+      transition: all 0.2s ease;
+      background: var(--gray-50);
+      color: var(--gray-900);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.08);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--gray-400);
+      font-size: 1rem;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .toggle-password:hover { color: var(--gray-700); }
+
+    .form-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -10px;
+      margin-bottom: 24px;
+    }
+
+    .link-forgot {
+      font-size: 0.83rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .link-forgot:hover { color: var(--primary-dark); text-decoration: underline; }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Sora', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.01em;
+    }
+    .btn-login:hover:not(:disabled) {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(37,99,235,0.35);
+    }
+    .btn-login:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .spinner-sm {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-banner {
+      background: var(--danger-light);
+      border: 1px solid #fca5a5;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 0.87rem;
+      color: var(--danger);
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .error-banner.show { display: flex; }
+
+    .login-footer {
+      position: absolute;
+      bottom: 28px;
+      left: 50px;
+      right: 50px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--gray-400);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .panel-left { display: none; }
+      .panel-right {
+        width: 100%;
+        padding: 40px 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Panneau gauche -->
+  <div class="panel-left">
+    <div class="dots-grid"></div>
+    <div class="brand">
+      <span class="brand-icon">📚</span>
+      <div class="brand-title">DIT Bibliothèque</div>
+      <div class="brand-features">
+        <div class="brand-feature"><span class="feature-dot"></span>Gestion des livres et du catalogue</div>
+        <div class="brand-feature"><span class="feature-dot"></span>Suivi des emprunts en temps réel</div>
+        <div class="brand-feature"><span class="feature-dot"></span>Gestion des utilisateurs et retards</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panneau droit -->
+  <div class="panel-right">
+    <div class="login-header">
+      <h1>Connexion</h1>
+      <p>Accédez à votre espace de gestion</p>
+    </div>
+
+    <div class="error-banner" id="errorBanner">
+      <span>⚠️</span>
+      <span id="errorMsg">Identifiants incorrects</span>
+    </div>
+
+    <form id="loginForm" autocomplete="on">
+      <div class="form-group">
+        <label class="form-label">Nom d'utilisateur</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input
+            class="form-control"
+            type="text"
+            id="username"
+            name="username"
+            placeholder="votre_nom_utilisateur"
+            autocomplete="username"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <div class="input-wrap">
+          <span class="input-icon">🔒</span>
+          <input
+            class="form-control"
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+          />
+          <button type="button" class="toggle-password" id="togglePwd" title="Afficher/masquer">👁️</button>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <a href="forgot-password.html" class="link-forgot">Mot de passe oublié ?</a>
+      </div>
+
+      <button type="submit" class="btn-login" id="btnLogin">
+        <div class="spinner-sm" id="loginSpinner"></div>
+        <span id="btnText">Se connecter</span>
+      </button>
+    </form>
+
+    <div class="login-footer">MASTER1-GRP7 Bibliothèque Numérique © 2026</div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    // Rediriger si déjà connecté
+    if (Auth.isAuthenticated()) Auth.redirectToApp();
+
+    const form     = document.getElementById('loginForm');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnText  = document.getElementById('btnText');
+    const spinner  = document.getElementById('loginSpinner');
+    const errBanner = document.getElementById('errorBanner');
+    const errMsg   = document.getElementById('errorMsg');
+
+    // Toggle password visibility
+    document.getElementById('togglePwd').addEventListener('click', () => {
+      const pwd = document.getElementById('password');
+      const btn = document.getElementById('togglePwd');
+      pwd.type = pwd.type === 'password' ? 'text' : 'password';
+      btn.textContent = pwd.type === 'password' ? '👁️' : '🙈';
+    });
+
+    function setLoading(on) {
+      btnLogin.disabled = on;
+      spinner.style.display = on ? 'block' : 'none';
+      btnText.textContent = on ? 'Connexion...' : 'Se connecter';
+    }
+
+    function showError(msg) {
+      errMsg.textContent = msg;
+      errBanner.classList.add('show');
+    }
+
+    function hideError() {
+      errBanner.classList.remove('show');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) {
+        showError('Veuillez remplir tous les champs.');
+        return;
+      }
+
+      setLoading(true);
+      try {
+        await Auth.login(username, password);
+        Auth.redirectToApp();
+      } catch (err) {
+        showError(err.message || 'Identifiants incorrects. Veuillez réessayer.');
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
