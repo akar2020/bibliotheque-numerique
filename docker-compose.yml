@@ -101,7 +101,7 @@ services:
       MAIL_PORT: 465
       MAIL_USER: toyrachid@gmail.com
       MAIL_PASS: glmf ompe xanb eyuz
-      URL_INIT_PWD: http://votre-frontend.com/initialize-password
+      URL_INIT_PWD: http://localhost/reset-password
       ACCESS_TOKEN_SECRET: super_secret_pour_access_123
       ACCESS_TOKEN_EXPIRY: 15m
       REFRESH_TOKEN_SECRET: super_secret_pour_access_123
