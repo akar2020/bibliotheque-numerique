@@ -1,4 +1,5 @@
 const { getPool } = require('../db');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mailer = require('../utils/mailer');
 
@@ -32,18 +33,20 @@ const getUserById = async (req, res) => {
 
 // POST /api/users
 const createUser = async (req, res) => {
-  const { name, email, type, phone, student_id } = req.body;
-  if (!name || !email) {
-    return res.status(400).json({ success: false, message: 'Nom et email sont requis.' });
-  }
-  const validTypes = ['Etudiant', 'Professeur', 'Personnel administratif'];
-  if (type && !validTypes.includes(type)) {
-    return res.status(400).json({ success: false, message: `Type invalide. Valeurs autorisées : ${validTypes.join(', ')}` });
-  }
+
   try {
+    const { name, email, type, phone, student_id } = req.body;
+// 1. Vérification si l'utilisateur existe déjà
+    const [existing] = await getPool().query('SELECT id FROM users WHERE email = ?', [email]);
+    if (existing.length) return res.status(400).json({ success: false, message: 'Email déjà utilisé.' });
+
+    // 2. SÉCURISATION : Hashage du mot de passe
+    const hashedPassword = await bcrypt.hash(password || 'DIT_Default_2026', 10);
+
+    // 3. Insertion avec le mot de passe sécurisé
     const [result] = await getPool().query(
-      'INSERT INTO users (name, email, type, phone, student_id, password) VALUES (?, ?, ?, ?, ?,?)',
-      [name, email, type || 'Etudiant', phone || null, student_id || null, 'TEMP_WAITING_INIT']
+      'INSERT INTO users (name, email, password, type, phone, student_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [name, email, hashedPassword, type || 'Etudiant', phone || null, student_id || null]
     );
 
     // 2. Générer un Token d'Initialisation
@@ -55,9 +58,7 @@ const createUser = async (req, res) => {
     // 3. Envoyer l'email
     await mailer.sendWelcomeEmail(email, initToken);
 
-
-    const [user] = await getPool().query('SELECT * FROM users WHERE id = ?', [result.insertId]);
-    res.status(201).json({ success: true, message: 'Utilisateur créé avec succès.', data: user[0] });
+    res.status(201).json({ success: true, message: 'Utilisateur créé avec succès.', data: { id: result.insertId, name, email } });
   } catch (err) {
     if (err.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ success: false, message: 'Un utilisateur avec cet email existe déjà.' });

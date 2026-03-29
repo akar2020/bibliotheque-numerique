@@ -5,7 +5,7 @@ const { getPool } = require('../db');
 // ================================================
 const LOAN_SELECT = `
   SELECT
-    l.id, l.book_id, l.copy_id, l.user_id,
+    l.id, l.copy_id, l.user_id,
     l.loan_date, l.due_date, l.return_date, l.status,
     l.created_at, l.updated_at,
     b.title   AS book_title,
@@ -13,7 +13,6 @@ const LOAN_SELECT = `
     u.name    AS user_name,
     bc.barcode AS copy_barcode
   FROM loans l
-  JOIN books      b  ON b.id  = l.book_id
   JOIN users      u  ON u.id  = l.user_id
   LEFT JOIN book_copies bc ON bc.id = l.copy_id
 `;
@@ -234,49 +233,48 @@ const returnLoan = async (req, res) => {
   try {
     await conn.beginTransaction();
 
-    const [rows] = await conn.query('SELECT * FROM loans WHERE id = ?', [req.params.id]);
-    if (!rows.length) {
-      await conn.rollback();
-      return res.status(404).json({ success: false, message: 'Emprunt non trouvé.' });
+    // 1. Vérifier si l'emprunt existe et n'est pas déjà retourné
+    const [loanRows] = await conn.query(
+      'SELECT copy_id, status FROM loans WHERE id = ?', 
+      [req.params.id]
+    );
+    
+    if (loanRows.length === 0) {
+      throw new Error('Emprunt non trouvé.');
+    }
+    
+    if (loanRows[0].status === 'returned') {
+      return res.status(400).json({ success: false, message: 'Livre déjà retourné.' });
     }
 
-    const loan = rows[0];
+    const copyId = loanRows[0].copy_id;
 
-    if (loan.status === 'returned') {
-      await conn.rollback();
-      return res.status(400).json({ success: false, message: 'Ce livre a déjà été retourné.' });
-    }
-
-    const returnDate = new Date().toISOString().split('T')[0];
-
-    // Mettre à jour l'emprunt
+    // 2. Mettre à jour l'emprunt
     await conn.query(
-      `UPDATE loans SET status = 'returned', return_date = ? WHERE id = ?`,
-      [returnDate, req.params.id]
+      'UPDATE loans SET status = "returned", return_date = CURDATE() WHERE id = ?',
+      [req.params.id]
     );
 
-    // Remettre l'exemplaire en 'available'
-    if (loan.copy_id) {
-      await conn.query(
-        'UPDATE book_copies SET status = ? WHERE id = ?',
-        ['available', loan.copy_id]
-      );
-    }
-
-    // Resynchroniser les compteurs du livre
+    // 3. Remettre l'exemplaire en disponible
     await conn.query(
-      `UPDATE books
-       SET
-         quantity  = (SELECT COUNT(*)                                    FROM book_copies WHERE book_id = ?),
-         available = (SELECT COUNT(*) FROM book_copies WHERE book_id = ? AND status = 'available')
+      'UPDATE book_copies SET status = "available" WHERE id = ?',
+      [copyId]
+    );
+
+    // 4. Synchroniser les compteurs du livre associé
+    // On récupère le book_id d'abord
+    const [copyRows] = await conn.query('SELECT book_id FROM book_copies WHERE id = ?', [copyId]);
+    const bookId = copyRows[0].book_id;
+
+    await conn.query(
+      `UPDATE books SET 
+       available = (SELECT COUNT(*) FROM book_copies WHERE book_id = ? AND status = 'available')
        WHERE id = ?`,
-      [loan.book_id, loan.book_id, loan.book_id]
+      [bookId, bookId]
     );
 
     await conn.commit();
-
-    const [updated] = await pool.query(`${LOAN_SELECT} WHERE l.id = ?`, [req.params.id]);
-    res.json({ success: true, message: 'Livre retourné avec succès.', data: updated[0] });
+    res.json({ success: true, message: 'Retour enregistré avec succès.' });
 
   } catch (err) {
     await conn.rollback();

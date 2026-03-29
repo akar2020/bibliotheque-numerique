@@ -11,7 +11,7 @@ const {
 } = require('../controllers/loansController');
 const authenticateToken = require('../security/auth.middleware');
 
-//router.use(authenticateToken);
+router.use(authenticateToken);
 
 router.get('/history', getLoanHistory);
 router.get('/overdue', getOverdueLoans);

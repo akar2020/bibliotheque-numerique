@@ -102,8 +102,8 @@ const createBook = async (req, res) => {
 
     // Insérer le livre (available = qty, sera recalculé via copies)
     const [result] = await conn.query(
-      'INSERT INTO books (title, author, isbn, description, category, quantity, available) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [title, author, isbn, description || null, category || null, qty, qty]
+      'INSERT INTO books (title, author, isbn, description, category) VALUES (?, ?, ?, ?, ?)',
+      [title, author, isbn, description || null, category || null]
     );
     const bookId = result.insertId;
 
@@ -116,14 +116,11 @@ const createBook = async (req, res) => {
       );
     }
 
+// 3. Synchronisation immédiate des compteurs
+    await syncBookCountersInternal(conn, bookId);
+
     await conn.commit();
 
-    const [book] = await pool.query(
-      `SELECT b.*, COUNT(bc.id) AS total_copies, SUM(bc.status='available') AS available_copies
-       FROM books b LEFT JOIN book_copies bc ON bc.book_id = b.id
-       WHERE b.id = ? GROUP BY b.id`,
-      [bookId]
-    );
     res.status(201).json({ success: true, message: 'Livre ajouté avec succès.', data: book[0] });
 
   } catch (err) {
@@ -135,6 +132,17 @@ const createBook = async (req, res) => {
   } finally {
     conn.release();
   }
+};
+
+// Utilitaire de synchronisation interne (réutilisable)
+const syncBookCountersInternal = async (connection, bookId) => {
+  await connection.query(
+    `UPDATE books SET 
+     quantity = (SELECT COUNT(*) FROM book_copies WHERE book_id = ?),
+     available = (SELECT COUNT(*) FROM book_copies WHERE book_id = ? AND status = 'available')
+     WHERE id = ?`,
+    [bookId, bookId, bookId]
+  );
 };
 
 // ================================================

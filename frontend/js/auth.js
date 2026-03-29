@@ -3,7 +3,7 @@
 // ================================================
 
 const HOST_AUTH = window.location.hostname;
-const AUTH_BASE = `http://${HOST_AUTH}:3000`; // Adapter le port à votre backend auth
+const AUTH_BASE = `/api/auth-service`; // Adapter le port à votre backend auth
 
 const Auth = {
   // --- Clés de stockage ---
@@ -74,11 +74,11 @@ const Auth = {
   },
 
   // --- Login ---
-  async login(username, password) {
+  async login(email, password) {
     const res = await fetch(`${AUTH_BASE}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username: email, password }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Identifiants incorrects');

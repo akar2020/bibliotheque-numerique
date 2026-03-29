@@ -27,6 +27,8 @@ CREATE TABLE `books` (
   `isbn` VARCHAR(30) UNIQUE NOT NULL,
   `description` TEXT,
   `category` VARCHAR(100),
+  `quantity` INT DEFAULT 0,    -- Ajouté pour syncBookCounters
+  `available` INT DEFAULT 0,   -- Ajouté pour syncBookCounters
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -92,10 +94,9 @@ INSERT INTO `book_copies` (`book_id`, `barcode`, `status`) VALUES
 
 -- Insertion des utilisateurs (Le mot de passe 'TEMP_PASS' doit être hashé en prod)
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `type`, `student_id`) VALUES
-(1, 'Moussa Diallo', 'kaka_abba@ymail.com', 'HASHED_PASSWORD_HERE', 'Etudiant', 'DIT2024001'),
-(2, 'Fatou Ndiaye', 'fatou.ndiaye@dit.sn', 'HASHED_PASSWORD_HERE', 'Etudiant', 'DIT2024002');
-(3, 'Admin', 'admin@dit.sn', 'HASHED_PASSWORD_HERE', 'Etudiant', 'DIT2024002');
-
+(1, 'Moussa Diallo', 'kaka_abba@ymail.com', '$2a$10$EIXV...', 'Etudiant', 'DIT2024001'),
+(2, 'Fatou Ndiaye', 'fatou.ndiaye@dit.sn', '$2a$10$EIXV...', 'Etudiant', 'DIT2024002'),
+(3, 'Admin', 'admin@dit.sn', '$2a$10$EIXV...', 'Personnel administratif', 'DIT2024_ADM'); -- Changé pour éviter le doublon
 -- Insertion d'un emprunt actif (sur l'exemplaire n°1)
 INSERT INTO `loans` (`copy_id`, `user_id`, `loan_date`, `due_date`, `status`) VALUES
 (1, 1, CURDATE() - INTERVAL 5 DAY, CURDATE() + INTERVAL 9 DAY, 'active');

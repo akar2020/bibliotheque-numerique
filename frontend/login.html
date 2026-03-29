@@ -422,17 +422,17 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       hideError();
-      const username = document.getElementById('username').value.trim();
+      const email = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
 
-      if (!username || !password) {
+      if (!email || !password) {
         showError('Veuillez remplir tous les champs.');
         return;
       }
 
       setLoading(true);
       try {
-        await Auth.login(username, password);
+        await Auth.login(email, password);
         Auth.redirectToApp();
       } catch (err) {
         showError(err.message || 'Identifiants incorrects. Veuillez réessayer.');

@@ -5,9 +5,9 @@
 const HOST = window.location.hostname;
 
 const API = {
-  BOOKS : `http://${HOST}:3001`,
-  USERS : `http://${HOST}:3002`,
-  LOANS : `http://${HOST}:3003`,
+  BOOKS : `/api/books-service`,
+  USERS : `/api/users-service`,
+  LOANS : `/api/loans-service`,
 
   async _req(url, method = 'GET', body = null) {
     const headers = { 'Content-Type': 'application/json' };
@@ -45,37 +45,37 @@ const API = {
 
   books: {
     // --- Livres ---
-    getAll   : ()          => API._req(`${API.BOOKS}/api/books`),
-    search   : (q)         => API._req(`${API.BOOKS}/api/books/search?q=${encodeURIComponent(q)}`),
-    getById  : (id)        => API._req(`${API.BOOKS}/api/books/${id}`),
-    create   : (body)      => API._req(`${API.BOOKS}/api/books`, 'POST', body),
-    update   : (id, b)     => API._req(`${API.BOOKS}/api/books/${id}`, 'PUT', b),
-    delete   : (id)        => API._req(`${API.BOOKS}/api/books/${id}`, 'DELETE'),
+    getAll   : ()          => API._req(`${API.BOOKS}`),
+    search   : (q)         => API._req(`${API.BOOKS}/search?q=${encodeURIComponent(q)}`),
+    getById  : (id)        => API._req(`${API.BOOKS}/${id}`),
+    create   : (body)      => API._req(`${API.BOOKS}`, 'POST', body),
+    update   : (id, b)     => API._req(`${API.BOOKS}/${id}`, 'PUT', b),
+    delete   : (id)        => API._req(`${API.BOOKS}/${id}`, 'DELETE'),
     health   : ()          => API._req(`${API.BOOKS}/health`),
 
     // --- Exemplaires ---
-    getCopies       : (bookId)              => API._req(`${API.BOOKS}/api/books/${bookId}/copies`),
-    addCopy         : (bookId, body)        => API._req(`${API.BOOKS}/api/books/${bookId}/copies`, 'POST', body),
-    updateCopyStatus: (bookId, copyId, b)   => API._req(`${API.BOOKS}/api/books/${bookId}/copies/${copyId}`, 'PATCH', b),
-    deleteCopy      : (bookId, copyId)      => API._req(`${API.BOOKS}/api/books/${bookId}/copies/${copyId}`, 'DELETE'),
+    getCopies       : (bookId)              => API._req(`${API.BOOKS}/${bookId}/copies`),
+    addCopy         : (bookId, body)        => API._req(`${API.BOOKS}/${bookId}/copies`, 'POST', body),
+    updateCopyStatus: (bookId, copyId, b)   => API._req(`${API.BOOKS}/${bookId}/copies/${copyId}`, 'PATCH', b),
+    deleteCopy      : (bookId, copyId)      => API._req(`${API.BOOKS}/${bookId}/copies/${copyId}`, 'DELETE'),
   },
 
   users: {
-    getAll  : (type)  => API._req(`${API.USERS}/api/users${type ? `?type=${encodeURIComponent(type)}` : ''}`),
-    getById : (id)    => API._req(`${API.USERS}/api/users/${id}`),
-    create  : (body)  => API._req(`${API.USERS}/api/users`, 'POST', body),
-    update  : (id, b) => API._req(`${API.USERS}/api/users/${id}`, 'PUT', b),
-    delete  : (id)    => API._req(`${API.USERS}/api/users/${id}`, 'DELETE'),
+    getAll  : (type)  => API._req(`${API.USERS}/${type ? `?type=${encodeURIComponent(type)}` : ''}`),
+    getById : (id)    => API._req(`${API.USERS}/${id}`),
+    create  : (body)  => API._req(`${API.USERS}`, 'POST', body),
+    update  : (id, b) => API._req(`${API.USERS}/${id}`, 'PUT', b),
+    delete  : (id)    => API._req(`${API.USERS}/${id}`, 'DELETE'),
     health  : ()      => API._req(`${API.USERS}/health`),
   },
 
   loans: {
-    getAll    : ()     => API._req(`${API.LOANS}/api/loans`),
-    getOverdue: ()     => API._req(`${API.LOANS}/api/loans/overdue`),
-    getHistory: ()     => API._req(`${API.LOANS}/api/loans/history`),
-    getByUser : (uid)  => API._req(`${API.LOANS}/api/loans/user/${uid}`),
-    create    : (body) => API._req(`${API.LOANS}/api/loans`, 'POST', body),
-    return    : (id)   => API._req(`${API.LOANS}/api/loans/${id}/return`, 'PUT'),
+    getAll    : ()     => API._req(`${API.LOANS}`),
+    getOverdue: ()     => API._req(`${API.LOANS}/overdue`),
+    getHistory: ()     => API._req(`${API.LOANS}/history`),
+    getByUser : (uid)  => API._req(`${API.LOANS}/user/${uid}`),
+    create    : (body) => API._req(`${API.LOANS}`, 'POST', body),
+    return    : (id)   => API._req(`${API.LOANS}/${id}/return`, 'PUT'),
     health    : ()     => API._req(`${API.LOANS}/health`),
   },
 };

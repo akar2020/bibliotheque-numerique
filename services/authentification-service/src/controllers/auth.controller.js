@@ -13,30 +13,40 @@ exports.health = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    try {
+try {
+        // Correction : On cherche par 'email' car 'username' n'existe pas dans votre SQL
         const [rows] = await getPool().query(
-            'SELECT id,password FROM users WHERE email = ?',
-            [req.body.username]
+            'SELECT id, name, password, email FROM users WHERE email = ?',
+            [req.body.email] // On attend 'email' du front-end
         );
+        
         const user = rows[0];
       
-        if (!user) return res.status(400).json({ message: "Utilisateur non trouvé" });
+        if (!user) return res.status(401).json({ message: "Identifiants incorrects" });
 
-        if (await bcrypt.compare(req.body.password, user.password)) {
-            const payload = { username: req.body.email, action: 'login' };
+        // Vérification du hash (assurez-vous d'avoir hashé avec bcrypt lors de l'insert)
+        const isMatch = await bcrypt.compare(req.body.password, user.password);
+        
+        if (isMatch) {
+            const payload = { id: user.id, email: user.email };
             
-            const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY });
-            const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY });
+            const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: process.env.ACCESS_TOKEN_EXPIRY || '1h' });
+            const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRY || '7d' });
             
-            res.json({ accessToken, refreshToken });
+            // On peut optionnellement stocker le refreshToken en base ici
+            
+            res.json({ 
+                accessToken, 
+                refreshToken,
+                user: { id: user.id, name: user.name, email: user.email } 
+            });
         } else {
-            res.status(401).json({ message: "Login ou Mot de passe incorrect(s)" });
+            res.status(401).json({ message: "Identifiants incorrects" });
         }        
-        //return genericResponse();
 
     } catch (err) {
-        console.error('[forgotPassword]', err);
-        return res.status(500).json({ message: "Erreur serveur." });
+        console.error('[Login Error]', err);
+        return res.status(500).json({ message: "Erreur technique lors de la connexion." });
     }
 };
 

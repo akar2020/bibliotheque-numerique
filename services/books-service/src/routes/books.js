@@ -16,7 +16,7 @@ const {
 
 const authenticateToken = require('../security/auth.middleware');
 
-//router.use(authenticateToken);
+router.use(authenticateToken);
 
 // --- Livres ---
 router.get('/search',  searchBooks);
