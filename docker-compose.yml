@@ -66,7 +66,6 @@ services:
       DB_USER: root
       DB_PASSWORD: root_password
       DB_NAME: biblio_dit
-      ACCESS_TOKEN_SECRET: super_secret_pour_access_123
       MAIL_HOST: smtp.gmail.com
       MAIL_PORT: 465
       MAIL_USER: toyrachid@gmail.com
@@ -108,7 +107,7 @@ services:
       REFRESH_TOKEN_SECRET: super_secret_pour_access_123
       REFRESH_TOKEN_EXPIRY: 7d
     ports:
-      - "3002:3002"
+      - "3000:3000"
     depends_on:
       mysql:
         condition: service_healthy
