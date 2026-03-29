@@ -386,7 +386,7 @@
 
   <script src="js/auth.js"></script>
   <script>
-    // Rediriger si déjà connecté
+    // Redirection uniquement si le token est déjà valide
     if (Auth.isAuthenticated()) Auth.redirectToApp();
 
     const form     = document.getElementById('loginForm');

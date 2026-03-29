@@ -10,73 +10,36 @@
         crossorigin="anonymous"
         referrerpolicy="no-referrer" />
   <style>
-    /* Fallback si Font Awesome ne charge pas */
     .fa-solid::before, .fa-regular::before { font-family: inherit; }
-
-    /* Bouton logout dans la topbar */
-    .topbar-user {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .topbar-username {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--gray-600);
-    }
-
+    .topbar-user { display: flex; align-items: center; gap: 10px; }
+    .topbar-username { font-size: 0.85rem; font-weight: 500; color: var(--gray-600); }
     .btn-logout {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 14px;
-      background: var(--gray-100);
-      color: var(--gray-700);
-      border: 1px solid var(--gray-200);
-      border-radius: 8px;
-      font-size: 0.83rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: inherit;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 14px; background: var(--gray-100); color: var(--gray-700);
+      border: 1px solid var(--gray-200); border-radius: 8px;
+      font-size: 0.83rem; font-weight: 500; cursor: pointer;
+      transition: all 0.2s ease; font-family: inherit;
     }
-    .btn-logout:hover {
-      background: var(--danger-light);
-      color: var(--danger);
-      border-color: #fca5a5;
-    }
+    .btn-logout:hover { background: var(--danger-light); color: var(--danger); border-color: #fca5a5; }
   </style>
 </head>
 <body>
 
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <span class="logo-icon">📚</span>
       <span>DIT Bibliothèque</span>
     </div>
     <nav class="sidebar-nav">
-      <a href="#" class="nav-item active" data-page="dashboard">
-        <span class="nav-icon">📊</span><span>Tableau de bord</span>
-      </a>
-      <a href="#" class="nav-item" data-page="books">
-        <span class="nav-icon">📖</span><span>Livres</span>
-      </a>
-      <a href="#" class="nav-item" data-page="users">
-        <span class="nav-icon">👥</span><span>Utilisateurs</span>
-      </a>
-      <a href="#" class="nav-item" data-page="loans">
-        <span class="nav-icon">🤝</span><span>Emprunts</span>
-      </a>
-      <a href="#" class="nav-item" data-page="overdue">
-        <span class="nav-icon">⚠️</span><span>Retards</span>
-      </a>
+      <a href="#" class="nav-item active" data-page="dashboard"><span class="nav-icon">📊</span><span>Tableau de bord</span></a>
+      <a href="#" class="nav-item" data-page="books"><span class="nav-icon">📖</span><span>Livres</span></a>
+      <a href="#" class="nav-item" data-page="users"><span class="nav-icon">👥</span><span>Utilisateurs</span></a>
+      <a href="#" class="nav-item" data-page="loans"><span class="nav-icon">🤝</span><span>Emprunts</span></a>
+      <a href="#" class="nav-item" data-page="overdue"><span class="nav-icon">⚠️</span><span>Retards</span></a>
     </nav>
     <div class="sidebar-footer">Master 1 IA — DIT</div>
   </aside>
 
-  <!-- MAIN -->
   <div class="main-wrapper">
     <header class="topbar">
       <button class="menu-toggle" id="menuToggle">☰</button>
@@ -86,12 +49,9 @@
         <span class="status-dot" id="dotUsers" title="Users Service"></span>
         <span class="status-dot" id="dotLoans" title="Loans Service"></span>
       </div>
-      <!-- Utilisateur connecté + Déconnexion -->
       <div class="topbar-user">
         <span class="topbar-username" id="topbarUsername"></span>
-        <button class="btn-logout" id="btnLogout" title="Se déconnecter">
-          🚪 Déconnexion
-        </button>
+        <button class="btn-logout" id="btnLogout" title="Se déconnecter">🚪 Déconnexion</button>
       </div>
     </header>
     <main class="content" id="mainContent">
@@ -99,7 +59,6 @@
     </main>
   </div>
 
-  <!-- MODAL -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal" id="modal">
       <div class="modal-header">
@@ -110,41 +69,31 @@
     </div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <!-- Auth en PREMIER, avant tous les autres scripts -->
+  <!-- auth.js est le SEUL script chargé statiquement.
+       Tous les autres sont injectés dynamiquement par requireAuth()
+       uniquement après confirmation que la session est valide. -->
   <script src="js/auth.js"></script>
   <script>
-    // Protection immédiate de la page
-    Auth.requireAuth();
-  </script>
-
-  <script src="js/api.js"></script>
-  <script src="js/dashboard.js"></script>
-  <script src="js/books.js"></script>
-  <script src="js/users.js"></script>
-  <script src="js/loans.js"></script>
-  <script src="js/app.js"></script>
-
-  <script>
-    // Afficher le nom d'utilisateur dans la topbar
-    document.addEventListener('DOMContentLoaded', () => {
+    Auth.requireAuth([
+      'js/api.js',
+      'js/dashboard.js',
+      'js/books.js',
+      'js/users.js',
+      'js/loans.js',
+      'js/app.js',
+    ]).then(() => {
       const user = Auth.getUser();
-      if (user) {
-        document.getElementById('topbarUsername').textContent = user.username;
-      }
+      if (user) document.getElementById('topbarUsername').textContent = user.username;
 
-      // Bouton déconnexion
       document.getElementById('btnLogout').addEventListener('click', async () => {
-        if (confirm('Voulez-vous vous déconnecter ?')) {
-          await Auth.logout();
-        }
+        if (confirm('Voulez-vous vous déconnecter ?')) await Auth.logout();
       });
 
-      // Démarrer le refresh automatique du token
       Auth.startAutoRefresh();
     });
   </script>
+
 </body>
 </html>

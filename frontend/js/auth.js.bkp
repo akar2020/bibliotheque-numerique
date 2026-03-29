@@ -148,59 +148,30 @@ const Auth = {
 
   // --- Redirection ---
   redirectToLogin() {
-    const path = window.location.pathname;
-    const authPages = ['login.html', 'forgot-password.html', 'reset-password.html'];
-    const isAuthPage = authPages.some(p => path.endsWith(p));
-    if (!isAuthPage) {
-      window.location.replace('/login.html'); // replace évite l'historique de navigation
+    const current = window.location.pathname;
+    const loginPage = '/login.html';
+    if (!current.endsWith('login.html') && !current.endsWith('forgot-password.html') && !current.endsWith('reset-password.html')) {
+      window.location.href = loginPage;
     }
   },
 
   redirectToApp() {
-    window.location.replace('/index.html');
+    window.location.href = '/index.html';
   },
 
-  // --- Protection de page ---
-  // Reçoit la liste des scripts à charger APRÈS confirmation de la session.
-  // Aucun script de l'app n'est injecté tant que le token n'est pas validé.
-  async requireAuth(appScripts = []) {
-    // Masquer immédiatement la page pour éviter tout flash
-    document.documentElement.style.visibility = 'hidden';
-
-    // 1. Token valide → charger l'app directement
-    if (this.isAuthenticated()) {
-      await this._loadScripts(appScripts);
-      document.documentElement.style.visibility = '';
-      return;
-    }
-
-    // 2. Token expiré mais refresh token présent → tenter le refresh
-    const refreshToken = this.getRefreshToken();
-    if (refreshToken) {
-      const ok = await this.refreshAccessToken();
-      if (ok) {
-        await this._loadScripts(appScripts);
-        document.documentElement.style.visibility = '';
-        return;
+  // --- Protection de page (à appeler en haut de index.html) ---
+  requireAuth() {
+    if (!this.isAuthenticated()) {
+      const refreshToken = this.getRefreshToken();
+      if (refreshToken) {
+        // Tenter le refresh silencieux
+        this.refreshAccessToken().then(ok => {
+          if (!ok) this.redirectToLogin();
+        });
+      } else {
+        this.redirectToLogin();
       }
     }
-
-    // 3. Aucune session valide → rediriger vers login
-    this.clearSession();
-    this.redirectToLogin();
-  },
-
-  // Charge une liste de scripts JS séquentiellement dans le DOM
-  _loadScripts(scripts) {
-    return scripts.reduce((chain, src) => {
-      return chain.then(() => new Promise((resolve, reject) => {
-        const s    = document.createElement('script');
-        s.src      = src;
-        s.onload   = resolve;
-        s.onerror  = () => reject(new Error(`Impossible de charger ${src}`));
-        document.body.appendChild(s);
-      }));
-    }, Promise.resolve());
   },
 
   // --- Auto-refresh périodique (toutes les 10 min) ---
