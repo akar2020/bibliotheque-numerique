@@ -79,7 +79,7 @@ exports.forgotPassword = async (req, res) => {
             [email]
         );
 
-        if (rows.length === 0) return genericResponse();
+        if (rows.length < 0) return res.status(400).json({ message: "Aucun user trouvé." });
 
         const user = rows[0];
         // Générer un token sécurisé
