@@ -187,7 +187,7 @@ const Auth = {
 
     // 3. Aucune session valide → rediriger vers login
     this.clearSession();
-    this.redirectToLogin();
+    //this.redirectToLogin();
   },
 
   // Charge une liste de scripts JS séquentiellement dans le DOM

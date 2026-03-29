@@ -4,7 +4,7 @@ const { getAllUsers, getUserById, createUser, updateUser, deleteUser } = require
 
 const authenticateToken = require('../security/auth.middleware');
 
-router.use(authenticateToken);
+//router.use(authenticateToken);
 
 router.get('/', getAllUsers);
 router.get('/:id', getUserById);
