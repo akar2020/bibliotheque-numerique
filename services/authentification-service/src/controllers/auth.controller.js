@@ -88,11 +88,12 @@ exports.forgotPassword = async (req, res) => {
 					process.env.ACCESS_TOKEN_SECRET,
 					{ expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
 				);
+        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5500'}/reset-password.html?token=${resetToken}`;
+        console.log(`[DEV] Lien reset pour ${email} → ${resetLink}`);
 		// Envoyer l'email
 		await mailer.sendWelcomeEmail(email, resetToken);
 
-        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5500'}/reset-password.html?token=${resetToken}`;
-        console.log(`[DEV] Lien reset pour ${email} → ${resetLink}`);
+        
 
         return genericResponse();
     } catch (err) {
