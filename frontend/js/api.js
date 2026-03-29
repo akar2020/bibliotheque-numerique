@@ -21,7 +21,7 @@ const API = {
 
     try {
       let res = await fetch(url, opts);
-
+/*
       // Token expiré → tentative de refresh silencieux
       if (res.status === 401 && typeof Auth !== 'undefined') {
         const refreshed = await Auth.refreshAccessToken();
@@ -33,7 +33,7 @@ const API = {
           throw new Error('Session expirée. Redirection en cours...');
         }
       }
-
+*/
       const data = await res.json();
       if (!data.success && res.status >= 400) throw new Error(data.message || 'Erreur serveur');
       return data;
